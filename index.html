@@ -1,0 +1,370 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>HPO 100-Day Roadmap - Build Talents & HappyTime</title>
+    <link href="https://fonts.googleapis.com/css2?family=Alexandria:wght@100..900&family=Oswald:wght@400;600;700&display=swap" rel="stylesheet">
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script src="https://unpkg.com/@phosphor-icons/web"></script>
+    <style>
+        :root {
+            --hpo-red: #B93622;
+            --hpo-orange: #F5A623;
+            --hpo-dark: #2D1A11;
+            --hpo-bg: #FFF9F5;
+        }
+        body {
+            font-family: 'Alexandria', sans-serif;
+            background-color: var(--hpo-bg);
+            color: var(--hpo-dark);
+        }
+        .oswald { font-family: 'Oswald', sans-serif; }
+        .phase-card {
+            transition: all 0.4s cubic-bezier(0.165, 0.84, 0.44, 1);
+        }
+        .phase-card:hover {
+            transform: translateY(-8px);
+            box-shadow: 0 20px 40px rgba(185, 54, 34, 0.1);
+        }
+        .status-badge {
+            font-size: 0.65rem;
+            letter-spacing: 0.1em;
+            text-transform: uppercase;
+            font-weight: 800;
+        }
+        .progress-bar {
+            height: 6px;
+            background: #E5E7EB;
+            border-radius: 10px;
+            overflow: hidden;
+        }
+        .progress-fill {
+            height: 100%;
+            background: linear-gradient(90deg, var(--hpo-red), var(--hpo-orange));
+            transition: width 1s ease-in-out;
+        }
+        .custom-scrollbar::-webkit-scrollbar { width: 4px; }
+        .custom-scrollbar::-webkit-scrollbar-track { background: transparent; }
+        .custom-scrollbar::-webkit-scrollbar-thumb { background: #E2E8F0; border-radius: 10px; }
+        
+        .example-box {
+            display: none;
+            animation: slideIn 0.3s ease-out;
+        }
+        @keyframes slideIn {
+            from { opacity: 0; transform: translateY(10px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+        
+        /* Modal Styles */
+        .modal-overlay {
+            display: none;
+            position: fixed;
+            top: 0; left: 0; width: 100%; height: 100%;
+            background: rgba(45, 26, 17, 0.85);
+            backdrop-filter: blur(8px);
+            z-index: 200;
+            align-items: center;
+            justify-content: center;
+            padding: 20px;
+        }
+        .modal-content {
+            background: white;
+            border-radius: 32px;
+            width: 100%;
+            max-width: 650px;
+            max-height: 90vh;
+            overflow-y: auto;
+            position: relative;
+            animation: modalPop 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+        }
+        @keyframes modalPop {
+            from { opacity: 0; transform: scale(0.9) translateY(30px); }
+            to { opacity: 1; transform: scale(1) translateY(0); }
+        }
+
+        .result-good { background: #DCFCE7; color: #166534; border-color: #BBF7D0; }
+        .result-warn { background: #FEF3C7; color: #92400E; border-color: #FDE68A; }
+        .result-bad { background: #FEE2E2; color: #991B1B; border-color: #FECACA; }
+    </style>
+</head>
+<body class="p-4 md:p-8 min-h-screen">
+
+    <!-- Modal: HCROI Calculator -->
+    <div id="modal-calculator" class="modal-overlay">
+        <div class="modal-content p-8 md:p-12 shadow-2xl border border-orange-100">
+            <button onclick="closeModal('modal-calculator')" class="absolute top-6 right-6 text-gray-400 hover:text-red-800 transition"><i class="ph-bold ph-x text-2xl"></i></button>
+            <h2 class="text-3xl font-black text-red-800 oswald uppercase mb-2 tracking-tight">Máy tính HCROI</h2>
+            <p class="text-xs font-bold text-gray-400 uppercase tracking-[0.2em] mb-8 border-b border-orange-100 pb-4">Đo lường sức khỏe tài chính nhân sự 2026</p>
+            
+            <div class="space-y-6">
+                <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+                    <div>
+                        <label class="block text-[10px] font-black uppercase text-gray-500 mb-2">Lợi nhuận gộp (VNĐ)</label>
+                        <input type="number" id="calc-gp" value="1000000000" class="w-full bg-orange-50/50 border-2 border-orange-100 rounded-2xl p-4 font-black text-lg outline-none focus:border-orange-400 transition" oninput="runHCROI()">
+                    </div>
+                    <div>
+                        <label class="block text-[10px] font-black uppercase text-gray-500 mb-2">CP Vận hành phi nhân sự (VNĐ)</label>
+                        <input type="number" id="calc-oc" value="300000000" class="w-full bg-orange-50/50 border-2 border-orange-100 rounded-2xl p-4 font-black text-lg outline-none focus:border-orange-400 transition" oninput="runHCROI()">
+                    </div>
+                </div>
+                <div>
+                    <label class="block text-[10px] font-black uppercase text-gray-500 mb-2">Tổng CP Nhân sự (x1.4 Lương Gross - VNĐ)</label>
+                    <input type="number" id="calc-hc" value="400000000" class="w-full bg-orange-50/50 border-2 border-orange-100 rounded-2xl p-4 font-black text-lg outline-none focus:border-orange-400 transition" oninput="runHCROI()">
+                </div>
+
+                <div id="calc-result-box" class="p-8 rounded-[2rem] border-2 flex flex-col items-center justify-center transition-all duration-500 result-good">
+                    <span class="text-[10px] font-black uppercase tracking-widest opacity-60 mb-2">Chỉ số HCROI thực tế</span>
+                    <div id="calc-value" class="text-7xl font-black oswald leading-none">1.75</div>
+                    <div id="calc-status" class="mt-4 px-6 py-1.5 bg-white/40 rounded-full text-[11px] font-black uppercase border border-black/10">Hiệu suất Tốt</div>
+                </div>
+
+                <p class="text-[10px] text-gray-400 italic text-center font-bold">Công thức: (Lợi nhuận gộp - CP Vận hành phi nhân sự) / Tổng CP Nhân sự</p>
+            </div>
+        </div>
+    </div>
+
+    <!-- Modal: Check-in Script -->
+    <div id="modal-script" class="modal-overlay">
+        <div class="modal-content p-8 md:p-12 shadow-2xl border border-orange-100">
+            <button onclick="closeModal('modal-script')" class="absolute top-6 right-6 text-gray-400 hover:text-red-800 transition"><i class="ph-bold ph-x text-2xl"></i></button>
+            <h2 class="text-3xl font-black text-red-800 oswald uppercase mb-2 tracking-tight">15 Câu hỏi Khai vấn</h2>
+            <p class="text-xs font-bold text-gray-400 uppercase tracking-[0.2em] mb-8 border-b border-orange-100 pb-4">CFRs: Mở khóa tiềm năng đội ngũ</p>
+            
+            <div class="space-y-8 custom-scrollbar max-h-[60vh] overflow-y-auto pr-4">
+                <div>
+                    <h3 class="flex items-center gap-2 text-sm font-black text-red-700 uppercase mb-4"><i class="ph-fill ph-ear"></i> 01. Lắng nghe & Thấu cảm (10 Phút)</h3>
+                    <div class="grid gap-3">
+                        <div class="p-4 bg-red-50 rounded-2xl text-[11px] font-bold border border-red-100 italic">"Điều gì khiến em cảm thấy tự hào nhất trong tuần qua?"</div>
+                        <div class="p-4 bg-red-50 rounded-2xl text-[11px] font-bold border border-red-100 italic">"Ngoài công việc, có rào cản cá nhân nào đang làm em bận tâm không?"</div>
+                        <div class="p-4 bg-red-50 rounded-2xl text-[11px] font-bold border border-red-100 italic">"Mức độ năng lượng của em hôm nay là bao nhiêu (thang điểm 1-10)?"</div>
+                        <div class="p-4 bg-red-50 rounded-2xl text-[11px] font-bold border border-red-100 italic">"Điều gì làm em thấy mất động lực nhất trong các dự án hiện tại?"</div>
+                        <div class="p-4 bg-red-50 rounded-2xl text-[11px] font-bold border border-red-100 italic">"Em thấy mối quan hệ với các đồng nghiệp khác hiện đang như thế nào?"</div>
+                    </div>
+                </div>
+
+                <div>
+                    <h3 class="flex items-center gap-2 text-sm font-black text-orange-600 uppercase mb-4"><i class="ph-fill ph-lightbulb"></i> 02. Rà soát & Tháo gỡ (10 Phút)</h3>
+                    <div class="grid gap-3">
+                        <div class="p-4 bg-orange-50 rounded-2xl text-[11px] font-bold border border-orange-100 italic">"Mục tiêu quan trọng nhất mà em muốn ưu tiên cho tuần tới là gì?"</div>
+                        <div class="p-4 bg-orange-50 rounded-2xl text-[11px] font-bold border border-orange-100 italic">"Rào cản lớn nhất đang cản trở tiến độ OKR của em lúc này là gì?"</div>
+                        <div class="p-4 bg-orange-50 rounded-2xl text-[11px] font-bold border border-orange-100 italic">"Anh/Chị có thể giúp gì để tháo gỡ khó khăn đó cho em ngay lập tức?"</div>
+                        <div class="p-4 bg-orange-50 rounded-2xl text-[11px] font-bold border border-orange-100 italic">"Em có thấy mình đang thiếu nguồn lực hay kỹ năng nào để làm tốt hơn không?"</div>
+                        <div class="p-4 bg-orange-50 rounded-2xl text-[11px] font-bold border border-orange-100 italic">"Có quy trình nào hiện tại đang khiến em mất quá nhiều thời gian vô ích không?"</div>
+                    </div>
+                </div>
+
+                <div>
+                    <h3 class="flex items-center gap-2 text-sm font-black text-green-700 uppercase mb-4"><i class="ph-fill ph-rocket"></i> 03. Cam kết & Phát triển (10 Phút)</h3>
+                    <div class="grid gap-3">
+                        <div class="p-4 bg-green-50 rounded-2xl text-[11px] font-bold border border-green-100 italic">"Ý tưởng cải tiến nào em muốn thử nghiệm trong tuần tới?"</div>
+                        <div class="p-4 bg-green-50 rounded-2xl text-[11px] font-bold border border-green-100 italic">"Phản hồi của em về sự hỗ trợ của Anh/Chị trong tuần qua là gì?"</div>
+                        <div class="p-4 bg-green-50 rounded-2xl text-[11px] font-bold border border-green-100 italic">"Kỹ năng chuyên môn nào em muốn dành thời gian để học thêm?"</div>
+                        <div class="p-4 bg-green-50 rounded-2xl text-[11px] font-bold border border-green-100 italic">"Em cảm thấy thế nào về sự ghi nhận của công ty dành cho nỗ lực của em?"</div>
+                        <div class="p-4 bg-green-50 rounded-2xl text-[11px] font-bold border border-green-100 italic">"Chúng ta cam kết sẽ đạt được điều gì quan trọng nhất trước buổi họp tới?"</div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="mt-8 flex justify-center">
+                <button onclick="window.print()" class="px-8 py-3 bg-red-800 text-white rounded-full font-black text-xs uppercase tracking-widest flex items-center gap-2"><i class="ph-bold ph-printer"></i> In kịch bản cầm tay</button>
+            </div>
+        </div>
+    </div>
+
+    <header class="max-w-7xl mx-auto mb-12 flex flex-col lg:flex-row justify-between items-end gap-6">
+        <div>
+            <div class="flex items-center gap-3 mb-4">
+                <span class="bg-red-800 text-white px-3 py-1 rounded-full text-[10px] font-black uppercase tracking-widest">Chiến lược 2026</span>
+                <span class="text-gray-400 font-bold text-xs uppercase tracking-widest">Build Talents x HappyTime</span>
+            </div>
+            <h1 class="text-4xl md:text-5xl font-black text-[#B93622] oswald leading-none mb-2 uppercase">LỘ TRÌNH HPO 100 NGÀY</h1>
+            <p class="text-gray-500 font-bold italic">Bản kế hoạch thực thi tích hợp Công cụ tương tác & Kịch bản CFRs.</p>
+        </div>
+        <div class="bg-white p-6 rounded-3xl border border-orange-100 shadow-xl w-full lg:w-96">
+            <div class="flex justify-between items-center mb-2">
+                <span class="text-[10px] font-black uppercase text-gray-400">Tiến độ chuyển đổi</span>
+                <span class="text-xl font-black text-red-700 oswald">12%</span>
+            </div>
+            <div class="progress-bar mb-1"><div class="progress-fill" style="width: 12%"></div></div>
+            <p class="text-[9px] text-orange-600 font-bold uppercase tracking-tighter">Giai đoạn 1: Thức tỉnh đang được khởi động</p>
+        </div>
+    </header>
+
+    <main class="max-w-7xl mx-auto grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 mb-12">
+        
+        <!-- Phase Cards (Same as before but linked to script logic) -->
+        <div class="phase-card bg-white rounded-[2.5rem] p-6 border-t-8 border-red-700 shadow-sm flex flex-col">
+            <div class="mb-6">
+                <div class="status-badge text-red-600 mb-2 flex items-center gap-1"><i class="ph-fill ph-lightning"></i> Giai đoạn 1</div>
+                <h2 class="text-xl font-black oswald uppercase leading-tight text-red-800">Thức tỉnh & Chẩn đoán</h2>
+                <p class="text-[10px] font-bold text-gray-400 mt-1 uppercase tracking-widest">Ngày 01 - 30</p>
+            </div>
+            <div class="space-y-4 flex-grow custom-scrollbar overflow-y-auto pr-2 mb-4">
+                <div class="item-group">
+                    <button onclick="toggleExample('ex1')" class="w-full text-left p-3 bg-red-50 rounded-2xl border border-red-100 hover:bg-red-100 transition flex justify-between items-center">
+                        <span class="text-[11px] font-black uppercase">1. Kiểm toán HCROI</span>
+                        <i class="ph-bold ph-plus text-xs"></i>
+                    </button>
+                    <div id="ex1" class="example-box mt-2 p-3 bg-white border border-red-100 rounded-xl text-[10px]">
+                        <p class="font-bold text-red-800 mb-1 tracking-wider uppercase">[Ví dụ minh họa]</p>
+                        <p class="text-gray-600 mb-2">Sử dụng máy tính HCROI trong hộp Toolbox phía dưới để thực hiện ngay bước này.</p>
+                        <button onclick="openModal('modal-calculator')" class="text-red-700 font-black underline uppercase">Mở máy tính</button>
+                    </div>
+                </div>
+
+                <div class="item-group">
+                    <button onclick="toggleExample('ex2')" class="w-full text-left p-3 bg-red-50 rounded-2xl border border-red-100 hover:bg-red-100 transition flex justify-between items-center">
+                        <span class="text-[11px] font-black uppercase">2. Mapping 9-Box Grid</span>
+                        <i class="ph-bold ph-plus text-xs"></i>
+                    </button>
+                    <div id="ex2" class="example-box mt-2 p-3 bg-white border border-red-100 rounded-xl text-[10px]">
+                        <p class="font-bold text-red-800 mb-1 tracking-wider uppercase">[Tiêu chí phân loại]</p>
+                        <ul class="list-disc pl-3 space-y-1 text-gray-600">
+                            <li><strong>Super Star:</strong> KPI > 100% & Có 3 ý kiến cải tiến/tháng.</li>
+                            <li><strong>Iceberg:</strong> KPI < 70% & Thường xuyên trễ deadline báo cáo.</li>
+                        </ul>
+                    </div>
+                </div>
+            </div>
+            <div class="mt-auto pt-4 border-t border-dashed border-gray-100 text-center">
+                <p class="text-[10px] italic font-bold text-red-900 leading-relaxed uppercase">"Biết trước để chuẩn bị."</p>
+            </div>
+        </div>
+
+        <!-- Placeholder for Phase 2-4 for brevity -->
+        <div class="phase-card bg-white rounded-[2.5rem] p-6 border-t-8 border-orange-500 shadow-sm flex flex-col">
+            <div class="mb-6">
+                <div class="status-badge text-orange-600 mb-2 flex items-center gap-1"><i class="ph-fill ph-cpu"></i> Giai đoạn 2</div>
+                <h2 class="text-xl font-black oswald uppercase leading-tight text-red-800">Trục xương sống Số</h2>
+                <p class="text-[10px] font-bold text-gray-400 mt-1 uppercase tracking-widest">Ngày 31 - 60</p>
+            </div>
+            <div class="space-y-4 flex-grow custom-scrollbar pr-2 mb-4">
+                 <div class="p-3 bg-orange-50 rounded-2xl border border-orange-100">
+                    <h4 class="text-[11px] font-black uppercase mb-1">Cài đặt HappyTime</h4>
+                    <p class="text-[10px] font-medium text-gray-600">Đưa 100% dữ liệu 3P & CFRs lên hệ thống di động.</p>
+                </div>
+                <div class="p-3 bg-orange-50 rounded-2xl border border-orange-100">
+                    <h4 class="text-[11px] font-black uppercase mb-1">Đào tạo Check-in</h4>
+                    <button onclick="openModal('modal-script')" class="text-orange-700 font-black underline uppercase text-[10px]">Sử dụng 15 câu hỏi mẫu</button>
+                </div>
+            </div>
+        </div>
+
+        <div class="phase-card bg-white rounded-[2.5rem] p-6 border-t-8 border-red-900 shadow-sm flex flex-col">
+            <div class="mb-6">
+                <div class="status-badge text-red-900 mb-2 flex items-center gap-1"><i class="ph-fill ph-rocket"></i> Giai đoạn 3</div>
+                <h2 class="text-xl font-black oswald uppercase leading-tight text-red-800">Nhịp đập Thực thi</h2>
+                <p class="text-[10px] font-bold text-gray-400 mt-1 uppercase tracking-widest">Ngày 61 - 90</p>
+            </div>
+            <div class="space-y-4 flex-grow custom-scrollbar pr-2 mb-4">
+                 <div class="p-3 bg-red-50 rounded-2xl border border-red-100">
+                    <h4 class="text-[11px] font-black uppercase mb-1">OKR Cycle</h4>
+                    <p class="text-[10px] font-medium text-gray-600">Duy trì Check-in tuần trên App HappyTime.</p>
+                </div>
+            </div>
+        </div>
+
+        <div class="phase-card bg-white rounded-[2.5rem] p-6 border-t-8 border-gray-800 shadow-sm flex flex-col">
+            <div class="mb-6">
+                <div class="status-badge text-gray-800 mb-2 flex items-center gap-1"><i class="ph-fill ph-medal"></i> Giai đoạn 4</div>
+                <h2 class="text-xl font-black oswald uppercase leading-tight text-red-800">Thu hoạch & Nhân bản</h2>
+                <p class="text-[10px] font-bold text-gray-400 mt-1 uppercase tracking-widest">Ngày 91 - 100</p>
+            </div>
+            <div class="space-y-4 flex-grow custom-scrollbar pr-2 mb-4">
+                 <div class="p-3 bg-gray-50 rounded-2xl border border-gray-200">
+                    <h4 class="text-[11px] font-black uppercase mb-1">ROI Review</h4>
+                    <p class="text-[10px] font-medium text-gray-600">Đo lường mức độ bứt phá sau 100 ngày.</p>
+                </div>
+            </div>
+        </div>
+    </main>
+
+    <!-- Interactive Tools (THE UPDATED TOOLBOX) -->
+    <section class="max-w-7xl mx-auto grid grid-cols-1 md:grid-cols-3 gap-8">
+        <div class="bg-red-800 rounded-[3rem] p-10 text-white relative overflow-hidden shadow-2xl col-span-1 md:col-span-2">
+            <div class="absolute -bottom-10 -right-10 opacity-10"><i class="ph-fill ph-notebook text-[15rem]"></i></div>
+            <h3 class="text-3xl font-black oswald mb-6 uppercase tracking-wider">Bộ công cụ Thực thi (Toolbox)</h3>
+            <div class="grid grid-cols-1 sm:grid-cols-2 gap-6">
+                <div class="bg-white/10 p-4 rounded-2xl border border-white/20">
+                    <h4 class="text-xs font-black uppercase mb-2 flex items-center gap-2"><i class="ph-fill ph-calculator"></i> Máy tính HCROI</h4>
+                    <p class="text-[10px] opacity-70 mb-3">Tự động hóa việc đo lường sức khỏe tài chính nhân sự.</p>
+                    <button onclick="openModal('modal-calculator')" class="text-[11px] font-black uppercase bg-orange-500 text-white px-5 py-2 rounded-full shadow-lg hover:scale-105 transition">Sử dụng ngay</button>
+                </div>
+                <div class="bg-white/10 p-4 rounded-2xl border border-white/20">
+                    <h4 class="text-xs font-black uppercase mb-2 flex items-center gap-2"><i class="ph-fill ph-chat-centered-text"></i> Kịch bản Check-in</h4>
+                    <p class="text-[10px] opacity-70 mb-3">15 câu hỏi khai vấn giúp Manager "mở khóa" tiềm năng đội ngũ.</p>
+                    <button onclick="openModal('modal-script')" class="text-[11px] font-black uppercase bg-white text-red-800 px-5 py-2 rounded-full shadow-lg hover:scale-105 transition">Tải kịch bản</button>
+                </div>
+            </div>
+        </div>
+
+        <div class="bg-white rounded-[3rem] p-10 border-2 border-orange-100 shadow-xl flex flex-col justify-center items-center text-center">
+            <div class="w-16 h-16 bg-orange-100 text-orange-600 rounded-full flex items-center justify-center mb-6 shadow-inner"><i class="ph-fill ph-device-mobile text-3xl"></i></div>
+            <h3 class="text-xl font-black text-red-800 oswald uppercase mb-3">Bắt đầu Số hóa?</h3>
+            <p class="text-[11px] text-gray-500 font-bold mb-6">Kết nối HappyTime để tự động hóa toàn bộ lộ trình này.</p>
+            <button class="w-full py-4 bg-red-800 text-white rounded-full font-black text-xs uppercase tracking-widest shadow-lg hover:bg-red-700 transition" onclick="alert('Khởi tạo hệ thống HPO trên HappyTime!')">Kích hoạt 100 ngày</button>
+        </div>
+    </section>
+
+    <footer class="max-w-7xl mx-auto mt-12 text-center text-[10px] text-gray-400 font-bold uppercase tracking-[0.3em]">
+        © 2026 Build Talents Strategy Framework • Powered by HappyTime
+    </footer>
+
+    <script>
+        function toggleExample(id) {
+            const el = document.getElementById(id);
+            const allExamples = document.querySelectorAll('.example-box');
+            allExamples.forEach(ex => { if(ex.id !== id) ex.style.display = 'none'; });
+            el.style.display = (el.style.display === 'block') ? 'none' : 'block';
+        }
+
+        // Modal Controls
+        function openModal(id) {
+            document.getElementById(id).style.display = 'flex';
+            document.body.style.overflow = 'hidden';
+            if(id === 'modal-calculator') runHCROI();
+        }
+
+        function closeModal(id) {
+            document.getElementById(id).style.display = 'none';
+            document.body.style.overflow = 'auto';
+        }
+
+        // HCROI Calculator Logic
+        function runHCROI() {
+            const gp = parseFloat(document.getElementById('calc-gp').value) || 0;
+            const oc = parseFloat(document.getElementById('calc-oc').value) || 0;
+            const hc = parseFloat(document.getElementById('calc-hc').value) || 1;
+            
+            const result = (gp - oc) / hc;
+            const valEl = document.getElementById('calc-value');
+            const boxEl = document.getElementById('calc-result-box');
+            const statusEl = document.getElementById('calc-status');
+            
+            valEl.innerText = result.toFixed(2);
+            
+            boxEl.className = "p-8 rounded-[2rem] border-2 flex flex-col items-center justify-center transition-all duration-500 ";
+            if(result >= 1.5) {
+                boxEl.classList.add('result-good');
+                statusEl.innerText = "Hiệu suất Tốt";
+            } else if(result >= 1.2) {
+                boxEl.classList.add('result-warn');
+                statusEl.innerText = "Mức Trung bình";
+            } else {
+                boxEl.classList.add('result-bad');
+                statusEl.innerText = "Cảnh báo Đỏ";
+            }
+        }
+
+        // Close modal on outside click
+        window.onclick = function(event) {
+            if (event.target.classList.contains('modal-overlay')) {
+                event.target.style.display = 'none';
+                document.body.style.overflow = 'auto';
+            }
+        }
+    </script>
+</body>
+</html>
